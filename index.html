@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Parking Spotter Dublin</title>
+<meta name="description" content="Find the cheapest legal parking near where you're going in Dublin.">
+<meta name="theme-color" content="#0f766e">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="app">
+  <section class="panel" aria-label="Search and results">
+    <header class="brand">
+      <span class="logo" aria-hidden="true">P</span>
+      <div>
+        <h1>Parking Spotter</h1>
+        <p>Cheapest legal parking near you, Dublin</p>
+      </div>
+    </header>
+
+    <div class="where">
+      <form class="search" id="searchForm" role="search" autocomplete="off">
+        <label for="q" class="sr-only">Where are you going?</label>
+        <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 0 1 5.9 12.1l4.7 4.7-1.4 1.4-4.7-4.7A7.5 7.5 0 1 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z"/></svg>
+        <input type="search" id="q" placeholder="Where are you going?" enterkeyhint="search" aria-autocomplete="list" aria-controls="hits">
+        <button type="button" class="icon-btn" id="locate" title="Use my location" aria-label="Use my location">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 2h2v3.06A7 7 0 0 1 18.94 11H22v2h-3.06A7 7 0 0 1 13 18.94V22h-2v-3.06A7 7 0 0 1 5.06 13H2v-2h3.06A7 7 0 0 1 11 5.06V2Zm1 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/></svg>
+        </button>
+      </form>
+      <ul class="hits" id="hits" aria-live="polite"></ul>
+      <div class="dest-line">
+        <span class="dest-label">Parking near <strong id="destName">City Centre</strong></span>
+        <button type="button" class="link-btn" id="saveDest"></button>
+      </div>
+      <div class="chips" id="quick" aria-label="Quick picks"></div>
+      <p class="hint">Tip: you can also tap anywhere on the map.</p>
+    </div>
+
+    <div class="controls">
+      <div class="control">
+        <span class="control-label" id="stayLbl">Staying</span>
+        <div class="seg" id="stay" role="group" aria-labelledby="stayLbl"></div>
+      </div>
+      <div class="control">
+        <span class="control-label" id="arriveLbl">Arriving</span>
+        <div class="arrive-row">
+          <div class="seg" id="arrive" role="group" aria-labelledby="arriveLbl"></div>
+          <input type="datetime-local" id="arriveAt" aria-label="Arrival date and time" hidden>
+        </div>
+      </div>
+      <div class="control">
+        <span class="control-label" id="walkLbl">Walk up to</span>
+        <div class="seg" id="walk" role="group" aria-labelledby="walkLbl"></div>
+      </div>
+      <div class="control">
+        <span class="control-label" id="sortLbl">Sort by</span>
+        <div class="seg" id="sort" role="group" aria-labelledby="sortLbl"></div>
+      </div>
+      <div class="toggles">
+        <label class="toggle"><input type="checkbox" id="fFree"><span>Free only</span></label>
+        <label class="toggle"><input type="checkbox" id="fCar"><span>Car parks only</span></label>
+      </div>
+    </div>
+
+    <div class="summary" id="summary" aria-live="polite"></div>
+    <ol class="results" id="results"></ol>
+
+    <footer class="small-print">
+      <p><strong>Where the data comes from.</strong> Street parking is the 795 Dublin City Council pay-and-display meters (June 2025 list), with zone prices from the council’s 2022 zone map and paid hours from its 2021 meter list. Outside the city it covers Dún Laoghaire-Rathdown’s 344 meters (positions from a 2018 survey, current fees), Fingal’s 139 meters (one usual rate, €1.20/h, as the council doesn’t publish prices per meter) and 78 South Dublin paid streets. Car park positions are approximate and their prices aren’t published as data. Live car park spaces come from Dublin City Council when the site is online. Rules change, so always check the sign or meter.</p>
+      <p>Map and search © OpenStreetMap contributors · Search by Photon and Nominatim · Parking data © Dublin City Council, Dún Laoghaire-Rathdown County Council, Fingal County Council and South Dublin County Council (CC BY 4.0)</p>
+    </footer>
+  </section>
+
+  <section class="map-wrap" aria-label="Map">
+    <div id="map"></div>
+    <div class="legend" aria-hidden="true">
+      <span><i class="dot dot-free"></i>Free</span>
+      <span><i class="dot dot-paid"></i>Meter</span>
+      <span><i class="dot dot-carpark"></i>Car park</span>
+    </div>
+  </section>
+</div>
+<div id="toast" role="status"></div>
+
+<!-- Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<!-- Data -->
+<script src="data/meters.js"></script>
+<script src="data/dlr-meters.js"></script>
+<script src="data/fcc-meters.js"></script>
+<script src="data/sdcc-meters.js"></script>
+<script src="data/carparks.js"></script>
+<script src="data/carpark-locations.js"></script>
+<!-- Logic -->
+<script src="js/pricing.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/map.js"></script>
+<script src="js/live-carparks.js"></script>
+<script src="js/search.js"></script>
+<!-- Page -->
+<script src="js/app.js"></script>
+</body>
+</html>
