@@ -1,0 +1,23 @@
+# Netlify settings for Parking Spotter Dublin.
+# The app is plain HTML, CSS and JavaScript, so there is no build step:
+# Netlify just serves the files in this folder as they are.
+
+[build]
+  publish = "."
+  command = ""
+  # Server-side code for live car park spaces (served at /api/carparks).
+  functions = "netlify/functions"
+
+# Basic security headers for every page.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+
+# Let browsers cache data files (GeoJSON, CSV) for an hour.
+[[headers]]
+  for = "/data/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
