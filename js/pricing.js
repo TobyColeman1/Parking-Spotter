@@ -120,7 +120,9 @@ function evaluate(opt, dest, hours, arrive, live) {
 
 // How each sort orders results. Unknown prices go after known ones when sorting by price.
 const SORTS = {
-  cheapest: { label: "Cheapest",   key: o => (o.cost === null ? 1e6 : o.cost * 1000) + o.m },
+  // Price first (in whole cents), then distance only to break ties. Metres stay below 100,000,
+  // so they can never outweigh even a 1c price difference.
+  cheapest: { label: "Cheapest",   key: o => (o.cost === null ? 1e12 : Math.round(o.cost * 100) * 1e5) + o.m },
   closest:  { label: "Closest",    key: o => o.m },
   value:    { label: "Best value", key: o => (o.cost === null ? 1e6 : o.cost) + o.walk * 0.15 } // a minute's walk ≈ 15c
 };

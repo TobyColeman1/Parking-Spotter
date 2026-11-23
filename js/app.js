@@ -78,13 +78,13 @@ function renderControls() {
     const b = document.createElement("button");
     b.type = "button"; b.className = "chip" + (d.saved ? " saved" : ""); b.textContent = d.name;
     b.setAttribute("aria-pressed", sameDest(d, state.dest));
-    b.onclick = () => setDestination({ name: d.name, lat: d.lat, lng: d.lng });
+    b.onclick = () => { Track.event("quick-pick"); setDestination({ name: d.name, lat: d.lat, lng: d.lng }); };
     return b;
   }));
 
   const presetOn = !state.customStay && STAYS.some(([v]) => v === state.hours);
   segButtons($("stay"), STAYS, presetOn ? state.hours : "custom", v => {
-    if (v === "custom") state.customStay = true;
+    if (v === "custom") { state.customStay = true; Track.once("custom-stay"); }
     else { state.customStay = false; state.hours = v; }
     render();
   });
@@ -198,13 +198,14 @@ function detail(o) {
     '<button type="button" class="btn ghost">Report</button></div>';
   d.querySelector(".ghost").onclick = async () => {
     const type = d.querySelector("select").value;
-    try { await Reports.save({ spotId: o.id, type }); toast("Thanks, report saved: " + type); }
+    try { await Reports.save({ spotId: o.id, type }); Track.event("report"); toast("Thanks, report saved: " + type); }
     catch (e) { toast("Couldn’t save the report. Try again later."); }
   };
   return d;
 }
 
 function openResult(id, fromMap) {
+  if (id) Track.event("open-result");
   state.open = id;
   render();
   if (id) {
@@ -238,7 +239,7 @@ function showHits(found, q) {
   hits.replaceChildren(...found.map(d => {
     const li = document.createElement("li"), b = document.createElement("button");
     b.type = "button"; b.innerHTML = esc(d.name) + "<small>" + esc(d.full) + "</small>";
-    b.onclick = () => { $("q").value = ""; setDestination({ name: d.name, lat: d.lat, lng: d.lng }); };
+    b.onclick = () => { Track.event("search"); $("q").value = ""; setDestination({ name: d.name, lat: d.lat, lng: d.lng }); };
     li.appendChild(b); return li;
   }));
 }
@@ -269,13 +270,13 @@ $("locate").onclick = () => {
   if (!navigator.geolocation) { toast("Your browser can’t share its location"); return; }
   toast("Finding you…");
   navigator.geolocation.getCurrentPosition(
-    p => setDestination({ name: "Your location", lat: +p.coords.latitude.toFixed(5), lng: +p.coords.longitude.toFixed(5) }),
+    p => { Track.event("use-my-location"); setDestination({ name: "Your location", lat: +p.coords.latitude.toFixed(5), lng: +p.coords.longitude.toFixed(5) }); },
     () => toast("Couldn’t get your location. Search or tap the map instead."),
     { enableHighAccuracy: true, timeout: 10000 });
 };
 
 // ---------- start ----------
-const leaflet = ParkingMap.init("map", (lat, lng) => setDestination({ name: "Pinned spot", lat, lng }));
+const leaflet = ParkingMap.init("map", (lat, lng) => { Track.event("map-tap"); setDestination({ name: "Pinned spot", lat, lng }); });
 
 // Live car park spaces: only when the site is hosted (the data comes through our own /api/carparks).
 if (leaflet && typeof LiveCarparks !== "undefined" && location.protocol !== "file:") {
